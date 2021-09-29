@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # 数据保存在样本的一个子文件夹中。我们需要找到脚本的位置
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-    datapath = os.path.join(modpath, 'datas/yahoo-1996-2015.txt')
+    datapath = os.path.join(modpath, '../datas/yahoo-1996-2015.txt')
 
     # 创建一个数据槽
     data = bt.feeds.YahooFinanceCSVData(
