@@ -7,14 +7,13 @@ def initialize(context):
     # 过滤掉order系列API产生的比error级别低的log
     # log.set_level('order', 'error')
     set_order_cost(OrderCost(close_tax=0.001, open_commission=0.0003, close_commission=0.0003, min_commission=5), type='stock')
-
-    ## 运行函数（reference_security为运行时间的参考标的；传入的标的只做种类区分，因此传入'000300.XSHG'或'510300.XSHG'是一样的）
-      # 开盘前运行
-    # run_daily(before_market_open, time='before_open', reference_security='000300.XSHG')
-      # 开盘时运行
+    run_daily(before_market_open, time='before_open', reference_security='000300.XSHG')
     run_daily(market_open, time='open', reference_security='000300.XSHG')
-      # 收盘后运行
-    # run_daily(after_market_close, time='after_close', reference_security='000300.XSHG')
+
+def before_market_open(context):
+    log.info('函数运行时间(before_market_open)：'+str(context.current_dt.time()))
+    send_message('美好的一天~')
+    g.security = "000567.XSHE"
 
 def market_open(context):
     log.info('函数运行时间(market_open):'+str(context.current_dt.time()))
