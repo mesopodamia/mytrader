@@ -36,8 +36,7 @@ def market_open(context):
 
     if (current_price < 13.97) and (empty_position == False):
         order_value(security, cash)
-        log.info("半仓情况，价格低于14.4, 买入全仓 %s" % (security))
-
+        log.info("半仓情况，价格低于13.97, 买入全仓 %s" % (security))
 
     if (current_price < 14.4):
         if (empty_position == True):
