@@ -18,19 +18,32 @@ def before_market_open(context):
 def market_open(context):
     log.info('函数运行时间(market_open):'+str(context.current_dt.time()))
     security = g.security
+    close_data = get_bars(security, count=5, unit='1d', fields=['close'])
     # 取得上一时间点价格
     current_price = close_data['close'][-1]
     # 取得当前的现金
     cash = context.portfolio.available_cash
+    MA5 = close_data['close'].mean()
+
+    # 判断是否满仓
+    if cash < current_price*100:
+        full_position = True
+    else:
+        full_position = False
 
     # 判断是否空仓
-    if (short_positions_dict.values() == None):
+    short_positions_dict = context.portfolio.short_positions
+    if list(short_positions_dict.values()) == 0:
         empty_position = True
     else:
         empty_position = False
 
-    # 价格低于13.85, 清仓
-    if (current_price < 13.85) and (empty_position == False):
+    if full_position == True and context.portfolio.positions[security].closeable_amount > 0: 
+        if current_price > 1.07*MA5 or current_price < 0.98*MA5:
+            order_target(security, 0)
+            log.info("价格高于5日的7%%或者低于5日2%%, 卖出所有仓位 %s" % (security))
+
+    if (current_price < 13.85) and (empty_position == False) and context.portfolio.positions[security].closeable_amount > 0:
         order_target(security, 0)
         log.info("价格低于13.85, 卖出所有仓位 %s" % (security))
 
@@ -38,12 +51,12 @@ def market_open(context):
         order_value(security, cash)
         log.info("半仓情况，价格低于13.97, 买入全仓 %s" % (security))
 
-    if (current_price < 14.4):
-        if (empty_position == True):
-            order_value(security, (cash/2))
-            log.info("空仓情况，价格低于14.4, 买入半仓 %s" % (security))
-        else:
+    if (empty_position == False):
+        if (current_price < 1.001*MA5) or (current_price > 0.995*MA5):
             order_value(security, cash)
-            log.info("半仓情况，价格低于14.4, 买入全仓 %s" % (security))
+            log.info("半仓情况，价格符合5周平均价, 买入全仓 %s" % (security))
 
-
+    if (current_price < 14.4) and (empty_position == True):
+        order_value(security, (cash/2))
+        log.info("空仓情况，价格低于14.4, 买入半仓 %s" % (security))
+        
