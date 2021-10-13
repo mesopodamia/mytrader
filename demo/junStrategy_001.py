@@ -32,8 +32,7 @@ def market_open(context):
         full_position = False
 
     # 判断是否空仓
-    short_positions_dict = context.portfolio.short_positions
-    if list(short_positions_dict.values()) == 0:
+    if context.portfolio.long_positions == {}:
         empty_position = True
     else:
         empty_position = False
@@ -52,7 +51,7 @@ def market_open(context):
         log.info("半仓情况，价格低于13.97, 买入全仓 %s" % (security))
 
     if (empty_position == False):
-        if (current_price < 1.001*MA5) or (current_price > 0.995*MA5):
+        if (current_price < 1.001*MA5) and (current_price > 0.995*MA5):
             order_value(security, cash)
             log.info("半仓情况，价格符合5周平均价, 买入全仓 %s" % (security))
 
