@@ -46,7 +46,7 @@ def market_open(context):
         order_target(security, 0)
         log.info("价格低于13.85, 卖出所有仓位 %s" % (security))
 
-    if (current_price < 13.97) and (empty_position == False):
+    if current_price < (MA5+0.05) and current_price > (MA5-0.05) and (empty_position == False):
         order_value(security, cash)
         log.info("半仓情况，价格低于13.97, 买入全仓 %s" % (security))
 
