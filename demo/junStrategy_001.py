@@ -19,6 +19,7 @@ def market_open(context):
     log.info('函数运行时间(market_open):'+str(context.current_dt.time()))
     security = g.security
     close_data = get_bars(security, count=5, unit='1d', fields=['close'])
+    W5 = get_bars(security, count=5, unit='1w', fields=['close'])['close'].mean()
     # 取得上一时间点价格
     current_price = close_data['close'][-1]
     # 取得当前的现金
@@ -38,24 +39,24 @@ def market_open(context):
         empty_position = False
 
     if full_position == True and context.portfolio.positions[security].closeable_amount > 0: 
-        if current_price > 1.07*MA5 or current_price < 0.98*MA5:
-            order_target(security, 0)
-            log.info("价格高于5日的7%%或者低于5日2%%, 卖出所有仓位 %s" % (security))
+        if current_price > W5*1.09 or current_price < W5*0.97:
+            order_value(security, cash)
+            log.info("价格低于在5周均价3或者高于9%, 卖出半仓 %s" % (security))
 
-    if (current_price < 13.85) and (empty_position == False) and context.portfolio.positions[security].closeable_amount > 0:
+    if (current_price < W5*0.98) and (empty_position == False) and context.portfolio.positions[security].closeable_amount > 0:
         order_target(security, 0)
         log.info("价格低于13.85, 卖出所有仓位 %s" % (security))
 
-    if current_price < (MA5+0.05) and current_price > (MA5-0.05) and (empty_position == False):
+    if current_price < W5+0.05 and current_price > W5-0.05 and (empty_position == False):
         order_value(security, cash)
-        log.info("半仓情况，价格低于13.97, 买入全仓 %s" % (security))
+        log.info("半仓情况，价格在5周均价上下浮动0.05元, 买入全仓 %s" % (security))
 
     if (empty_position == False):
-        if (current_price < 1.001*MA5) and (current_price > 0.995*MA5):
+        if current_price < W5+0.05 and current_price > W5-0.05:
             order_value(security, cash)
-            log.info("半仓情况，价格符合5周平均价, 买入全仓 %s" % (security))
+            log.info("半仓情况，价格在5周均价上下浮动0.05元, 买入全仓 %s" % (security))
 
-    if (current_price < 14.4) and (empty_position == True):
+    if current_price < (MA5+0.05) and current_price > (MA5-0.05) and empty_position == True:
         order_value(security, (cash/2))
-        log.info("空仓情况，价格低于14.4, 买入半仓 %s" % (security))
+        log.info("空仓情况，价格在5日均价上下浮动0.05元, 买入半仓 %s" % (security))
         
