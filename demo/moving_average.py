@@ -6,6 +6,14 @@ def initialize(context):
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
 
+# 获取000001.XSHE当前交易日date_nowadays的前一个交易日的5日的MA的数值，那么传入参数为('000001.XSHE', context.current_dt.date(), 1, 5)  
+def get_MA(code, date_nowadays, n_date, days):
+   trade_dates_list = get_trade_days(end_date=date_nowadays, count=n_date+1)
+   date_that_get_MA = trade_dates_list[-n_date-1]
+   price_data = get_price(code, start_date=None, end_date=date_that_get_MA, frequency='daily', fields=None, skip_paused=False, fq='pre', count=days, panel=True)
+   MA = price_data['close'].mean()
+   return MA
+
 def handle_data(context, data):
     security = g.security
     # 获取股票的收盘价
@@ -18,9 +26,17 @@ def handle_data(context, data):
 
     cash = context.portfolio.available_cash
 
-    if MA60 > MA20 and MA10 > MA30:
-        order_value(security, cash)
-        log.info("买入开仓 %s" % (security))
+    count = 0
+    for x in range(10):
+        n = 1 + x
+        C_MA60 = get_MA(security, context.current_dt.date(), n, 60)
+        C_MA10 = get_MA(security, context.current_dt.date(), n, 10)
+        if C_MA60 > C_MA10:
+            count = count + 1
+    if count == 10 or MA60 > MA20:
+        if context.current_dt.strftime('%H:%M:%S') > '14:30:00' and MA10 > MA30:        
+            order_value(security, cash)
+            log.info("买入开仓 %s" % (security))
 
     if len(context.portfolio.positions) > 0:
         for stock in context.portfolio.positions.keys():
