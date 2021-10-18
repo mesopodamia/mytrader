@@ -16,7 +16,6 @@ def get_MA(code, date_nowadays, n_date, days):
 
 def handle_data(context, data):
     security = g.security
-    # 获取股票的收盘价
     close_data = attribute_history(security, 5, '1d', ['close'])
     MA5 = close_data['close'].mean()
     MA60 = attribute_history(security, 60, '1d', ['close'])['close'].mean()
