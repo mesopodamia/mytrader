@@ -1,5 +1,5 @@
 # 导入聚宽函数库
-import jqdata
+from jqdata import *
 
 def initialize(context):
     g.security = '000001.XSHE'
